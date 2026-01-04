@@ -2,13 +2,17 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Sora2 创作中心 - 修复稳定版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sora2 创作中心 - 精准进度版</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* 旋转动画 */
         .loading-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .progress-fill { transition: width 0.8s ease-in-out; }
+        /* 进度条平滑过渡动画 */
+        .progress-fill { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* 历史记录卡片滑入动画 */
         .history-item { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -18,7 +22,9 @@
     <header class="bg-orange-600 p-4 text-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold"><i class="fas fa-video mr-2"></i>Sora2 创作中心</h1>
-            <div id="connectionStatus" class="text-[10px] bg-orange-800 px-2 py-1 rounded">本地历史已启用</div>
+            <div class="text-[10px] bg-orange-800 px-2 py-1 rounded flex items-center">
+                <i class="fas fa-save mr-1"></i> 本地自动保存已开启
+            </div>
         </div>
     </header>
 
@@ -26,157 +32,252 @@
         <section class="lg:col-span-3 space-y-4">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="font-bold text-gray-700">常用角色</h2>
-                    <button onclick="toggleAddChar()" class="text-orange-600 text-sm font-bold">+ 新增</button>
+                    <h2 class="font-bold text-gray-700">常用角色 (自动保存)</h2>
+                    <button onclick="toggleAddChar()" class="text-orange-600 text-sm font-bold hover:bg-orange-50 px-2 py-1 rounded">+ 新增</button>
                 </div>
-                <div id="charList" class="grid grid-cols-2 gap-3 mb-4"></div>
+                <div id="charList" class="grid grid-cols-2 gap-3 mb-4 min-h-[100px]"></div>
+                
                 <div id="addCharForm" class="hidden border-t pt-4 space-y-3">
-                    <input type="text" id="newCharId" placeholder="角色ID" class="w-full p-2 border rounded text-sm outline-none">
-                    <input type="file" id="newCharImg" accept="image/*" class="w-full text-xs">
-                    <button onclick="saveToLocal()" class="w-full bg-orange-600 text-white py-2 rounded text-sm font-bold">保存角色</button>
+                    <input type="text" id="newCharId" placeholder="角色ID (例如: Lily)" class="w-full p-2 border rounded text-sm outline-none focus:border-orange-500">
+                    <div class="flex items-center justify-center w-full">
+                        <label for="newCharImg" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6 text-gray-400">
+                                <i class="fas fa-cloud-upload-alt mb-2"></i>
+                                <p class="text-xs">点击上传角色图片</p>
+                            </div>
+                            <input type="file" id="newCharImg" accept="image/*" class="hidden">
+                        </label>
+                    </div>
+                    <button onclick="saveToLocal()" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded text-sm font-bold transition-colors">保存角色</button>
                 </div>
             </div>
-            <button onclick="clearHistory()" class="w-full text-xs text-gray-400 hover:text-red-500 transition-colors">清空所有历史记录</button>
+            <button onclick="clearHistory()" class="w-full text-xs text-gray-400 hover:text-red-500 transition-colors flex items-center justify-center">
+                <i class="fas fa-trash-alt mr-1"></i> 清空所有本地记录
+            </button>
         </section>
 
         <section class="lg:col-span-5 space-y-6">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">API KEY</label>
-                    <input type="password" id="apiKey" placeholder="输入 Bearer Token" class="w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500">
+                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">API KEY (必填)</label>
+                    <input type="password" id="apiKey" placeholder="在此输入您的 Bearer Token" class="w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
                 </div>
                 <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">提示词 (@关联角色)</label>
-                    <textarea id="prompt" rows="8" class="w-full p-4 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500" placeholder="描述你的视频场景..."></textarea>
+                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">提示词 (点击左侧角色可快速插入)</label>
+                    <textarea id="prompt" rows="8" class="w-full p-4 border rounded-xl text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all resize-none" placeholder="描述你的视频场景... 例如：一个穿着宇航服的 @Lily 在月球上行走。"></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-4 mb-6">
-                    <select id="ratio" class="p-3 border rounded-xl text-sm">
+                    <select id="aspectRatio" class="p-3 border rounded-xl text-sm outline-none focus:border-orange-500 bg-white">
                         <option value="16:9">横屏 16:9</option>
                         <option value="9:16">竖屏 9:16</option>
+                        <option value="1:1">方形 1:1</option>
                     </select>
-                    <select id="duration" class="p-3 border rounded-xl text-sm">
-                        <option value="10">时长 10s</option>
+                    <select id="duration" class="p-3 border rounded-xl text-sm outline-none focus:border-orange-500 bg-white">
+                        <option value="5">时长 5s</option>
+                        <option value="10" selected>时长 10s</option>
                         <option value="15">时长 15s</option>
                     </select>
                 </div>
-                <button onclick="startRender()" id="renderBtn" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl transition-all flex justify-center items-center">
-                    <span id="btnText">开始生成并自动保存</span>
+                <button onclick="startRender()" id="renderBtn" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all flex justify-center items-center group">
+                    <span id="btnText">开始生成视频</span>
+                    <i class="fas fa-rocket ml-2 group-hover:translate-x-1 transition-transform"></i>
                 </button>
             </div>
         </section>
 
         <section class="lg:col-span-4">
-            <h2 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest">任务与历史作品</h2>
-            <div id="taskQueue" class="space-y-4"></div>
+            <div class="flex items-center justify-between mb-4">
+                 <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest">任务队列 & 历史记录</h2>
+                 <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded-full">自动保存中</span>
+            </div>
+           
+            <div id="taskQueue" class="space-y-4 pb-8">
+                </div>
         </section>
     </main>
 
 <script>
-    const API_HOST = "https://grsaiapi.com";
-    
-    // 初始化数据
-    let myCharacters = JSON.parse(localStorage.getItem('sora_v4_chars') || '[]');
-    let videoHistory = JSON.parse(localStorage.getItem('sora_v4_history') || '[]');
+    // ================= 配置项 =================
+    const API_HOST = "https://grsaiapi.com"; // API 地址
+    const STORAGE_KEY_CHARS = 'sora_v5_chars_storage'; // 本地存储Key-角色
+    const STORAGE_KEY_HISTORY = 'sora_v5_history_storage'; // 本地存储Key-历史
 
-    // --- UI 基础功能 ---
+    // ================= 数据初始化 =================
+    // 从 localStorage 读取数据，如果不存在则初始化为空数组
+    let myCharacters = JSON.parse(localStorage.getItem(STORAGE_KEY_CHARS) || '[]');
+    let videoHistory = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+
+    // 页面加载完成后立即渲染本地数据
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCharacters();
+        renderHistory();
+    });
+
+    // ================= 角色管理功能 (带图片上传和自动保存) =================
     function toggleAddChar() { 
-        document.getElementById('addCharForm').classList.toggle('hidden'); 
+        const form = document.getElementById('addCharForm');
+        form.classList.toggle('hidden');
+        if (!form.classList.contains('hidden')) {
+            document.getElementById('newCharId').focus();
+        }
     }
 
     function insertChar(id) { 
-        document.getElementById('prompt').value += ` @${id} `; 
+        const promptArea = document.getElementById('prompt');
+        promptArea.value += ` @${id} `; 
+        promptArea.focus();
     }
 
+    // 渲染角色列表
     function renderCharacters() {
         const list = document.getElementById('charList');
+        if (myCharacters.length === 0) {
+            list.innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-4 border-2 border-dashed rounded-xl">暂无角色，请点击新增</div>';
+            return;
+        }
         list.innerHTML = myCharacters.map((char, index) => `
-            <div class="relative group border rounded-xl p-2 text-center hover:border-orange-500 cursor-pointer bg-white transition-all shadow-sm" onclick="insertChar('${char.id}')">
-                <img src="${char.avatar}" class="w-full aspect-square rounded-lg object-cover mb-1">
-                <div class="text-[10px] font-bold truncate text-gray-500">@${char.id}</div>
-                <button onclick="deleteChar(event, ${index})" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-[10px]">×</button>
+            <div class="relative group border rounded-xl p-2 text-center hover:border-orange-500 cursor-pointer bg-white transition-all shadow-sm hover:shadow-md" onclick="insertChar('${char.id}')">
+                <div class="w-full aspect-square rounded-lg mb-2 overflow-hidden bg-gray-100">
+                    <img src="${char.avatar}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                </div>
+                <div class="text-xs font-bold truncate text-gray-700 bg-gray-50 rounded-md py-1">@${char.id}</div>
+                <button onclick="deleteChar(event, ${index})" class="absolute -top-2 -right-2 bg-white text-red-500 border border-red-200 rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         `).join('');
     }
 
+    // 保存角色到本地 (包含图片压缩处理)
     async function saveToLocal() {
-        let charId = document.getElementById('newCharId').value.trim().replace(/^@+/, '');
-        const imgFile = document.getElementById('newCharImg').files[0];
-        if (!charId || !imgFile) return alert("请填写ID并选择图片");
-        
+        const charIdInput = document.getElementById('newCharId');
+        const imgInput = document.getElementById('newCharImg');
+        let charId = charIdInput.value.trim().replace(/^@+/, '').replace(/\s+/g, '_');
+        const imgFile = imgInput.files[0];
+
+        if (!charId) return alert("请填写角色ID");
+        if (!imgFile) return alert("请选择一张角色图片");
+        if (myCharacters.some(c => c.id === charId)) return alert("该角色ID已存在，请更换");
+
         const reader = new FileReader();
         reader.readAsDataURL(imgFile);
         reader.onload = (e) => {
             const img = new Image();
             img.src = e.target.result;
             img.onload = () => {
+                // 创建 canvas 压缩图片，避免 localStorage 爆满
                 const canvas = document.createElement('canvas');
-                canvas.width = 150; canvas.height = 150;
-                canvas.getContext('2d').drawImage(img, 0, 0, 150, 150);
-                myCharacters.push({ id: charId, avatar: canvas.toDataURL('image/jpeg', 0.8) });
-                localStorage.setItem('sora_v4_chars', JSON.stringify(myCharacters));
+                const ctx = canvas.getContext('2d');
+                const maxSize = 200; // 将图片限制在 200x200 以内
+                let width = img.width;
+                let height = img.height;
+                if (width > height) { if (width > maxSize) { height *= maxSize / width; width = maxSize; } }
+                else { if (height > maxSize) { width *= maxSize / height; height = maxSize; } }
+                canvas.width = width; canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // 保存数据
+                myCharacters.push({ id: charId, avatar: canvas.toDataURL('image/jpeg', 0.7) });
+                localStorage.setItem(STORAGE_KEY_CHARS, JSON.stringify(myCharacters));
+                
+                // 重置表单并重新渲染
                 renderCharacters();
                 toggleAddChar();
+                charIdInput.value = '';
+                imgInput.value = '';
             };
         };
     }
 
     function deleteChar(e, index) { 
         e.stopPropagation(); 
-        myCharacters.splice(index, 1); 
-        localStorage.setItem('sora_v4_chars', JSON.stringify(myCharacters)); 
-        renderCharacters(); 
+        if(confirm('确定要删除这个角色吗？')) {
+            myCharacters.splice(index, 1); 
+            localStorage.setItem(STORAGE_KEY_CHARS, JSON.stringify(myCharacters)); 
+            renderCharacters(); 
+        }
     }
 
-    // --- 历史记录 ---
+    // ================= 历史记录功能 (自动保存) =================
     function renderHistory() {
-        videoHistory.forEach(item => appendFinishedCard(item.id, item.prompt, item.url, true));
+        // 只渲染还没有在页面上的历史记录
+        videoHistory.forEach(item => {
+            if (!document.getElementById(item.id)) {
+                appendFinishedCard(item.id, item.prompt, item.url, item.time, true);
+            }
+        });
     }
 
+    // 成功生成视频后，自动保存到历史记录
     function saveVideoToHistory(prompt, url) {
-        const item = { id: 'hist-' + Date.now(), prompt, url, time: new Date().toLocaleString() };
-        videoHistory.unshift(item);
-        localStorage.setItem('sora_v4_history', JSON.stringify(videoHistory));
+        const item = { 
+            id: 'hist-' + Date.now(), 
+            prompt: prompt, 
+            url: url, 
+            time: new Date().toLocaleString() 
+        };
+        videoHistory.unshift(item); // 加到最前面
+        // 限制历史记录数量，防止存储溢出（例如最多存20条）
+        if (videoHistory.length > 20) videoHistory.pop();
+        localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(videoHistory));
     }
 
     function clearHistory() {
-        if(confirm("确定清空所有历史记录吗？")) {
-            localStorage.removeItem('sora_v4_history');
+        if(confirm("确定要清空所有本地保存的角色和历史记录吗？此操作不可恢复。")) {
+            localStorage.removeItem(STORAGE_KEY_CHARS);
+            localStorage.removeItem(STORAGE_KEY_HISTORY);
             location.reload();
         }
     }
 
-    // --- 核心生成逻辑 ---
-    async function startRender() {
-        const promptText = document.getElementById('prompt').value;
-        const key = document.getElementById('apiKey').value;
-        if (!promptText || !key) return alert("请填写提示词和密钥");
+    // ================= 核心：视频生成与精准进度条 =================
+    let isRendering = false;
 
+    async function startRender() {
+        if (isRendering) return;
+        const promptText = document.getElementById('prompt').value.trim();
+        const key = document.getElementById('apiKey').value.trim();
+        if (!promptText) return alert("请填写提示词");
+        if (!key) return alert("请填写 API KEY");
+
+        setRenderButtonState(true);
         const uiId = 'task-' + Date.now();
+        // 创建带有精准进度条结构的卡片
         createTaskCard(uiId, promptText);
 
         try {
+            // 1. 提交任务
             const resp = await fetch(`${API_HOST}/v1/video/sora-video`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: "sora-2", prompt: promptText,
-                    aspectRatio: document.getElementById('ratio').value,
+                    model: "sora-2", 
+                    prompt: promptText,
+                    aspectRatio: document.getElementById('aspectRatio').value,
                     duration: parseInt(document.getElementById('duration').value)
                 })
             });
 
-            const data = await parseStreamData(resp);
-            if (!resp.ok) throw new Error(data?.msg || "提交失败");
+            const data = await parseApiResponse(resp);
+            if (!resp.ok) throw new Error(data?.msg || data?.message || "提交失败，请检查API Key");
 
             const taskId = data.data?.id || data.id;
-            updateTaskStatus(uiId, `任务受理 (ID: ${taskId})`, 'loading', 5);
+            if (!taskId) throw new Error("未获取到任务ID");
+
+            updateTaskStatus(uiId, { msg: `已受理，等待队列... (ID: ${taskId.slice(-6)})`, progress: 5 });
+            
+            // 2. 开始轮询真实进度
             pollTaskStatus(taskId, uiId, key, promptText);
+
         } catch (e) {
-            updateTaskStatus(uiId, "错误: " + e.message, 'error');
+            updateTaskStatus(uiId, { msg: "提交失败: " + e.message, type: 'error' });
+            setRenderButtonState(false);
         }
     }
 
+    // 轮询任务状态 (核心改进点：处理精准进度)
     async function pollTaskStatus(taskId, uiId, key, originalPrompt) {
+        let errorCount = 0;
         const timer = setInterval(async () => {
             try {
                 const resp = await fetch(`${API_HOST}/v1/draw/result`, {
@@ -184,94 +285,197 @@
                     headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: taskId })
                 });
-                const res = await parseStreamData(resp);
+                const res = await parseApiResponse(resp);
                 if (!res || !res.data) return;
 
-                const { status, progress, results, url } = res.data;
+                // *** 获取关键数据 ***
+                const status = res.data.status;
+                // 确保 progress 是数字且在 0-100 之间
+                let progress = parseInt(res.data.progress) || 0;
+                progress = Math.max(0, Math.min(99, progress)); // 运行中最多显示99%，成功才显示100%
+
                 if (status === 'succeeded' || status === 'success') {
                     clearInterval(timer);
-                    const videoUrl = results?.[0]?.url || url || (results && results[0]);
+                    setRenderButtonState(false);
+                    // 成功时强制设置进度为 100%
+                    updateTaskStatus(uiId, { msg: '生成完成，正在加载视频...', type: 'success', progress: 100 });
+                    
+                    const videoUrl = res.data.results?.[0]?.url || res.data.url || (Array.isArray(res.data.results) && res.data.results[0]);
                     if (videoUrl) {
+                        // *** 自动保存到历史记录 ***
                         saveVideoToHistory(originalPrompt, videoUrl);
+                        // 显示视频播放器
                         showFinishedVideo(uiId, videoUrl);
+                    } else {
+                        updateTaskStatus(uiId, { msg: "错误: 状态成功但未返回视频地址", type: 'error' });
                     }
                 } else if (status === 'failed') {
                     clearInterval(timer);
-                    updateTaskStatus(uiId, "失败: " + (res.data.failure_reason || "被拦截"), "error");
+                    setRenderButtonState(false);
+                    updateTaskStatus(uiId, { msg: "生成失败: " + (res.data.failure_reason || "未知错误"), type: 'error' });
                 } else {
-                    updateTaskStatus(uiId, `生成中: ${progress || 0}%`, "loading", progress);
+                    // *** 核心：更新精准进度条和百分比文字 ***
+                    errorCount = 0; // 重置错误计数
+                    let statusMsg = progress > 0 ? `AI 正在努力生成中...` : `服务器排队中...`;
+                    updateTaskStatus(uiId, { msg: statusMsg, type: 'loading', progress: progress });
                 }
-            } catch (e) { console.error("轮询出错", e); }
-        }, 5000);
+            } catch (e) {
+                console.error("轮询出错:", e);
+                errorCount++;
+                if (errorCount > 10) { // 连续出错10次才判定失败
+                    clearInterval(timer);
+                    setRenderButtonState(false);
+                    updateTaskStatus(uiId, { msg: "网络连接中断，请检查网络", type: 'error' });
+                }
+            }
+        }, 3000); // 每3秒轮询一次
     }
 
-    // --- 渲染辅助 ---
+    // ================= UI 渲染与更新辅助函数 =================
+
+    // 创建新的任务卡片 (包含精准进度条结构)
     function createTaskCard(id, prompt) {
         const html = `
-            <div id="${id}" class="bg-white p-4 rounded-2xl border-l-4 border-gray-300 shadow-sm history-item">
-                <p class="text-[10px] text-gray-500 line-clamp-2 mb-2">${prompt}</p>
-                <div class="prog-node">
-                    <div class="w-full bg-gray-100 h-1 rounded-full mb-2 overflow-hidden">
-                        <div class="progress-fill h-full bg-orange-500 w-[2%]"></div>
+            <div id="${id}" class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden history-item transition-all">
+                <div class="p-4 pb-3 bg-gray-50 border-b border-gray-100 flex justify-between items-start">
+                    <p class="text-xs text-gray-600 line-clamp-2 font-medium flex-1 mr-2" title="${prompt}">${prompt}</p>
+                    <span class="time-tag text-[10px] text-gray-400 whitespace-nowrap">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="p-4 processing-container">
+                    <div class="flex items-center justify-between text-xs mb-2 font-bold">
+                        <div class="status-text flex items-center text-orange-600">
+                            <i class="fas fa-circle-notch loading-spin mr-2"></i> 准备提交任务...
+                        </div>
+                        <div class="progress-percent text-orange-600 font-extrabold">0%</div>
                     </div>
-                    <div class="status-area text-xs text-orange-600 flex items-center font-bold">
-                        <i class="fas fa-circle-notch loading-spin mr-2"></i><span class="status-text">处理中...</span>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden relative">
+                        <div class="progress-fill h-full bg-gradient-to-r from-orange-400 to-orange-600 w-0 rounded-full"></div>
                     </div>
                 </div>
-                <div class="video-area hidden mt-3 border-t pt-3"></div>
+                <div class="video-area hidden bg-black relative group"></div>
             </div>`;
         document.getElementById('taskQueue').insertAdjacentHTML('afterbegin', html);
     }
 
-    function appendFinishedCard(id, prompt, url, isHistory = false) {
+    // 更新任务卡片状态 (核心UI更新逻辑)
+    function updateTaskStatus(id, { msg, type = 'loading', progress = 0 }) {
+        const card = document.getElementById(id);
+        if (!card) return;
+
+        const statusTextEl = card.querySelector('.status-text');
+        const percentEl = card.querySelector('.progress-percent');
+        const fillEl = card.querySelector('.progress-fill');
+        const spinner = card.querySelector('.loading-spin');
+
+        // 更新文字消息
+        if (msg && statusTextEl) statusTextEl.innerHTML = (type === 'loading' ? '<i class="fas fa-circle-notch loading-spin mr-2"></i>' : '') + msg;
+
+        // *** 核心：更新精准进度条和百分比 ***
+        if (progress >= 0 && fillEl && percentEl) {
+            fillEl.style.width = `${progress}%`;
+            percentEl.innerText = `${progress}%`;
+        }
+
+        // 处理状态颜色
+        if (type === 'error') {
+            statusTextEl.classList.replace('text-orange-600', 'text-red-500');
+            percentEl.classList.replace('text-orange-600', 'text-red-500');
+            fillEl.classList.remove('from-orange-400', 'to-orange-600');
+            fillEl.classList.add('bg-red-500');
+            percentEl.innerText = 'ERR';
+            if (spinner) spinner.remove();
+        } else if (type === 'success') {
+            statusTextEl.classList.replace('text-orange-600', 'text-green-600');
+            percentEl.classList.replace('text-orange-600', 'text-green-600');
+            fillEl.classList.remove('from-orange-400', 'to-orange-600');
+            fillEl.classList.add('bg-green-500');
+            if (spinner) spinner.remove();
+            statusTextEl.innerHTML = '<i class="fas fa-check-circle mr-2"></i> 生成成功';
+        }
+    }
+
+    // 渲染已完成的任务（用于历史记录或新任务成功时）
+    function appendFinishedCard(id, prompt, url, timeStr, isHistory = false) {
         createTaskCard(id, prompt);
+        const card = document.getElementById(id);
+        if(timeStr) card.querySelector('.time-tag').innerText = isHistory ? (timeStr + ' (历史)') : timeStr;
+        updateTaskStatus(id, { msg: '已完成', type: 'success', progress: 100 });
         showFinishedVideo(id, url);
-        if(isHistory) document.getElementById(id).querySelector('.status-area')?.insertAdjacentHTML('beforeend', '<span class="ml-auto text-[9px] text-gray-400">历史</span>');
     }
 
-    function updateTaskStatus(id, msg, type, progress = 0) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.querySelector('.status-text').innerText = msg;
-        if (progress > 0) el.querySelector('.progress-fill').style.width = progress + '%';
-        if (type === 'error') el.querySelector('.status-area').classList.add('text-red-500');
-    }
-
+    // 显示最终视频
     function showFinishedVideo(id, url) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.classList.replace('border-gray-300', 'border-green-500');
-        el.querySelector('.prog-node')?.classList.add('hidden');
-        const area = el.querySelector('.video-area');
-        area.innerHTML = `<video src="${url}" controls class="w-full rounded-lg bg-black mb-2"></video>
-            <div class="flex gap-2"><button onclick="window.open('${url}')" class="flex-1 bg-gray-100 py-1 rounded text-xs">预览</button>
-            <button onclick="forceDownload('${url}')" class="flex-1 bg-orange-600 text-white py-1 rounded text-xs">下载</button></div>`;
-        area.classList.remove('hidden');
+        const card = document.getElementById(id);
+        if (!card) return;
+        
+        // 隐藏进度条区域，显示视频区域
+        card.querySelector('.processing-container').classList.add('hidden');
+        const videoArea = card.querySelector('.video-area');
+        videoArea.innerHTML = `
+            <video src="${url}" controls class="w-full aspect-video object-contain"></video>
+            <div class="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onclick="window.open('${url}', '_blank')" class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full text-xs backdrop-blur-sm" title="在新窗口预览">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button onclick="forceDownload('${url}')" class="bg-orange-600/80 hover:bg-orange-700 text-white p-2 rounded-full text-xs backdrop-blur-sm" title="下载视频">
+                    <i class="fas fa-download"></i>
+                </button>
+            </div>
+        `;
+        videoArea.classList.remove('hidden');
     }
 
-    async function parseStreamData(response) {
+    // ================= 工具函数 =================
+    function setRenderButtonState(loading) {
+        isRendering = loading;
+        const btn = document.getElementById('renderBtn');
+        const btnText = document.getElementById('btnText');
+        const icon = btn.querySelector('i');
+        if (loading) {
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+            btnText.innerText = '正在提交任务...';
+            if(icon) icon.classList.add('hidden');
+        } else {
+            btn.disabled = false;
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            btnText.innerText = '开始生成视频';
+            if(icon) icon.classList.remove('hidden');
+        }
+    }
+
+    // 解析 API 响应 (兼容普通 JSON 和 SSE 流格式)
+    async function parseApiResponse(response) {
         try {
             const text = await response.text();
+            // 尝试直接解析 JSON
+            try { return JSON.parse(text); } catch (e) {}
+            // 尝试解析 SSE 格式 (data: {...})
             const lines = text.trim().split('\n');
             for (let i = lines.length - 1; i >= 0; i--) {
-                let l = lines[i].replace('data:', '').trim();
-                if (l.startsWith('{')) return JSON.parse(l);
+                let line = lines[i].trim();
+                if (line.startsWith('data:')) {
+                    try { return JSON.parse(line.substring(5).trim()); } catch (e) {}
+                }
             }
         } catch (e) { return null; }
+        return null;
     }
 
     async function forceDownload(url) {
-        const r = await fetch(url);
-        const b = await r.blob();
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(b);
-        a.download = `video_${Date.now()}.mp4`;
-        a.click();
+        try {
+            const link = document.createElement('a');
+            link.href = url;
+            // 尝试从 URL 中提取文件名，如果没有则使用时间戳
+            const fileName = url.split('/').pop().split('?')[0] || `Sora2_Video_${Date.now()}.mp4`;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            window.open(url, '_blank');
+        }
     }
-
-    // 启动
-    renderCharacters();
-    renderHistory();
 </script>
 </body>
 </html>
