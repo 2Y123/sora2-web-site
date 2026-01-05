@@ -3,25 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sora2 创作中心 - Pro版</title>
+    <title>Sora2 创作中心 - 最终版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === 动态背景动画 === */
+        /* === 修复后的动态背景动画 === */
         @keyframes gradient-xy {
-            0%, 100% { background-position: 0% 50%; }
+            0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         .animate-gradient {
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            /* 增强颜色的饱和度，使其更明显 */
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fad0c4, #a18cd1, #fbc2eb);
             background-size: 400% 400%;
-            animation: gradient-xy 15s ease infinite;
+            /* 稍微加快速度，让动态更易被感知 */
+            animation: gradient-xy 12s ease infinite;
         }
-        /* 玻璃拟态效果 */
+        
+        /* 玻璃拟态卡片样式 */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.85); /*稍微增加不透明度以突出文字*/
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
 
         /* 旋转和过渡动画 */
@@ -30,22 +34,25 @@
         .progress-fill { transition: width 0.5s ease-in-out; }
         .task-card { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 自定义滚动条 */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
     </style>
 </head>
-<body class="font-sans text-gray-800 min-h-screen relative">
+<body class="font-sans text-gray-800 min-h-screen relative overflow-x-hidden">
 
-    <div class="fixed inset-0 -z-10 animate-gradient opacity-20"></div>
-    <div class="fixed inset-0 -z-10 bg-gray-50/50"></div>
+    <div class="fixed inset-0 -z-10 animate-gradient opacity-60"></div>
 
-    <header class="bg-slate-900/95 backdrop-blur text-white p-4 shadow-lg sticky top-0 z-50 border-b border-slate-700">
+    <header class="bg-slate-900/90 backdrop-blur-md text-white p-4 shadow-lg sticky top-0 z-50 border-b border-slate-700">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold flex items-center">
-                <i class="fas fa-magic mr-2 text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500"></i>
-                Sora2 创作中心 <span class="text-xs bg-slate-700 ml-2 px-2 py-0.5 rounded text-gray-300">Pro</span>
+                <i class="fas fa-magic mr-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400"></i>
+                Sora2 创作中心 <span class="text-xs bg-slate-700 ml-2 px-2 py-0.5 rounded text-gray-300">Ultimate</span>
             </h1>
             <div class="text-[10px] flex gap-2">
-                <span class="bg-slate-800 px-2 py-1 rounded border border-slate-600"><i class="fas fa-image text-blue-400"></i> 垫图增强开启</span>
-                <span class="bg-slate-800 px-2 py-1 rounded border border-slate-600"><i class="fas fa-sync text-green-400"></i> 并发模式</span>
+                <span class="bg-slate-800 px-2 py-1 rounded border border-slate-600"><i class="fas fa-bolt text-yellow-400"></i> 极速模式</span>
             </div>
         </div>
     </header>
@@ -56,84 +63,84 @@
             <div class="glass-panel p-4 rounded-xl shadow-sm">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="font-bold text-gray-700 text-sm">角色库</h2>
-                    <button onclick="toggleAddChar()" class="text-orange-600 text-xs font-bold hover:bg-orange-50 px-2 py-1 rounded transition">+ 新增</button>
+                    <button onclick="toggleAddChar()" class="text-purple-600 text-xs font-bold hover:bg-purple-50 px-2 py-1 rounded transition">+ 新增</button>
                 </div>
-                <div id="charList" class="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1"></div>
+                <div id="charList" class="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar"></div>
                 
                 <div id="addCharForm" class="hidden border-t mt-3 pt-3 space-y-2 border-gray-200">
-                    <input type="text" id="newCharId" placeholder="ID (如: Lily)" class="w-full p-2 border rounded text-xs outline-none focus:border-orange-500">
-                    <input type="file" id="newCharImg" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-orange-50 file:text-orange-700 cursor-pointer">
+                    <input type="text" id="newCharId" placeholder="ID (如: Lily)" class="w-full p-2 border rounded text-xs outline-none focus:border-purple-500">
+                    <input type="file" id="newCharImg" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-purple-50 file:text-purple-700 cursor-pointer">
                     <button onclick="saveCharToLocal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-1.5 rounded text-xs font-bold transition">保存</button>
                 </div>
             </div>
-            <button onclick="clearCache()" class="w-full text-[10px] text-gray-500 hover:text-red-500 text-center py-2 glass-panel rounded-lg">重置所有数据</button>
+            <button onclick="clearCache()" class="w-full text-[10px] text-gray-500 hover:text-red-500 text-center py-2 glass-panel rounded-lg hover:bg-white/90 transition">重置所有数据</button>
         </section>
 
         <section class="lg:col-span-5 space-y-4">
-            <div class="glass-panel p-5 rounded-xl shadow-lg border-t-4 border-orange-500">
+            <div class="glass-panel p-5 rounded-xl shadow-lg border-t-4 border-purple-500">
                 <div class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">API Key (自动保存)</label>
-                        <input type="password" id="apiKey" placeholder="在此输入 Bearer Token" class="w-full p-2.5 bg-white/80 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+                        <input type="password" id="apiKey" placeholder="在此输入 Bearer Token" class="w-full p-2.5 bg-white/60 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all focus:bg-white">
                     </div>
 
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">提示词 Prompt</label>
-                        <textarea id="prompt" rows="5" class="w-full p-3 bg-white/80 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all resize-none shadow-inner" placeholder="描述你的画面..."></textarea>
+                        <textarea id="prompt" rows="5" class="w-full p-3 bg-white/60 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all resize-none shadow-inner focus:bg-white" placeholder="描述你的画面..."></textarea>
                     </div>
 
                     <div class="relative">
                         <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase flex justify-between">
                             <span>参考底图 (垫图)</span>
-                            <span class="text-orange-500 text-[10px] font-normal" id="refStatus">未选择</span>
+                            <span class="text-purple-500 text-[10px] font-normal" id="refStatus">未选择</span>
                         </label>
                         
-                        <div id="uploadZone" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-orange-400 hover:bg-orange-50/50 transition-colors group bg-white/50">
+                        <div id="uploadZone" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/50 transition-colors group bg-white/40">
                             <input type="file" id="refInput" accept="image/*" class="hidden" onchange="handleRefSelect(event)">
                             <label for="refInput" class="cursor-pointer block">
-                                <i class="fas fa-images text-gray-300 group-hover:text-orange-500 text-2xl mb-2 transition-transform group-hover:scale-110"></i>
+                                <i class="fas fa-images text-gray-300 group-hover:text-purple-500 text-2xl mb-2 transition-transform group-hover:scale-110"></i>
                                 <div class="text-xs text-gray-500">点击上传参考图 (将会影响视频构图/风格)</div>
                             </label>
                         </div>
 
-                        <div id="previewZone" class="hidden flex items-center bg-orange-50 border border-orange-200 rounded-lg p-2 mt-2 shadow-sm">
+                        <div id="previewZone" class="hidden flex items-center bg-purple-50 border border-purple-200 rounded-lg p-2 mt-2 shadow-sm">
                             <div class="relative group cursor-pointer">
                                 <img id="refPreview" src="" class="w-16 h-16 rounded-md object-cover border border-white shadow-sm" onclick="document.getElementById('refInput').click()">
                                 <div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center rounded-md text-white text-xs">换图</div>
                             </div>
                             <div class="ml-3 flex-1 min-w-0">
-                                <p class="text-xs font-bold text-orange-900 truncate">参考图已就绪</p>
-                                <p class="text-[10px] text-orange-700/70">将在生成时强制应用</p>
+                                <p class="text-xs font-bold text-purple-900 truncate">参考图已就绪</p>
+                                <p class="text-[10px] text-purple-700/70">将在生成时强制应用</p>
                             </div>
                             <button onclick="clearRef()" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 transition"><i class="fas fa-trash-alt"></i></button>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <select id="aspectRatio" class="p-2.5 bg-white/80 border border-gray-200 rounded-lg text-sm outline-none focus:border-orange-500 cursor-pointer">
+                        <select id="aspectRatio" class="p-2.5 bg-white/60 border border-gray-200 rounded-lg text-sm outline-none focus:border-purple-500 cursor-pointer focus:bg-white">
                             <option value="16:9">宽屏 16:9</option>
                             <option value="9:16">竖屏 9:16</option>
                             <option value="1:1">方形 1:1</option>
                         </select>
-                        <select id="duration" class="p-2.5 bg-white/80 border border-gray-200 rounded-lg text-sm outline-none focus:border-orange-500 cursor-pointer">
-                            <option value="5">5秒视频</option>
-                            <option value="10" selected>10秒视频</option>
+                        <select id="duration" class="p-2.5 bg-white/60 border border-gray-200 rounded-lg text-sm outline-none focus:border-purple-500 cursor-pointer focus:bg-white">
+                            <option value="10" selected>时长 10秒</option>
+                            <option value="15">时长 15秒</option>
                         </select>
                     </div>
 
-                    <button id="submitBtn" onclick="submitTask()" class="w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex justify-center items-center group relative overflow-hidden">
+                    <button id="submitBtn" onclick="submitTask()" class="w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex justify-center items-center group relative overflow-hidden">
                         <div class="absolute inset-0 bg-white/10 group-hover:translate-x-full transition-transform duration-500 transform -skew-x-12 -translate-x-full"></div>
                         <span id="btnText">立即生成视频</span>
-                        <i id="btnIcon" class="fas fa-bolt ml-2 text-yellow-300"></i>
+                        <i id="btnIcon" class="fas fa-paper-plane ml-2"></i>
                     </button>
                 </div>
             </div>
         </section>
 
         <section class="lg:col-span-4 h-full flex flex-col">
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest">任务列表 & 历史</h2>
-                <span class="text-[10px] bg-white/50 text-gray-500 px-2 py-0.5 rounded-full border border-gray-200 backdrop-blur-sm">自动保存中</span>
+            <div class="flex items-center justify-between mb-3 glass-panel p-2 rounded-lg">
+                <h2 class="text-xs font-bold text-gray-600 uppercase tracking-widest ml-2">任务列表 & 历史</h2>
+                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full border border-green-200">自动保存中</span>
             </div>
             
             <div id="taskContainer" class="space-y-4 pb-10 overflow-y-auto max-h-[85vh] pr-1 custom-scrollbar">
@@ -146,39 +153,31 @@
     const API_HOST = "https://grsaiapi.com";
     let currentRefBase64 = null;
     
-    // 初始化加载
     document.addEventListener('DOMContentLoaded', () => {
         loadChars();
         loadHistory();
-        
-        // 自动回填上次使用的 Key
         const savedKey = localStorage.getItem('sora_api_key');
         if(savedKey) document.getElementById('apiKey').value = savedKey;
     });
 
-    // ================= 核心：提交逻辑 (修复参考图) =================
-    
+    // ================= 核心：提交逻辑 =================
     async function submitTask() {
         const btn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
         
-        // 1. 获取并保存 Key
         const prompt = document.getElementById('prompt').value.trim();
         const key = document.getElementById('apiKey').value.trim();
         if(!prompt || !key) return alert("请填写 API Key 和 提示词");
         localStorage.setItem('sora_api_key', key);
 
-        // 2. 锁定 UI
         btn.disabled = true;
         btn.classList.add('opacity-75', 'cursor-wait');
         btnText.innerText = "正在发送指令...";
         
-        // 3. 创建 UI 卡片
         const uiId = 'job-' + Date.now();
-        createTaskCard(uiId, prompt, currentRefBase64); // 传入参考图用于预览
+        createTaskCard(uiId, prompt, currentRefBase64);
 
         try {
-            // 4. 构建 Payload (饱和式攻击：使用多种可能的字段名)
             const payload = {
                 model: "sora-2",
                 prompt: prompt,
@@ -186,21 +185,15 @@
                 duration: parseInt(document.getElementById('duration').value)
             };
 
-            // *** 核心修改：同时尝试多种字段名，确保参考图生效 ***
             if(currentRefBase64) {
-                payload.reference_image = currentRefBase64; // 最可能的字段
-                payload.image = currentRefBase64;           // 常见备用字段
-                payload.image_url = currentRefBase64;       // 兼容性字段
-                console.log("已添加参考图 (多字段模式)");
+                payload.reference_image = currentRefBase64;
+                payload.image = currentRefBase64;
+                payload.image_url = currentRefBase64;
             }
 
-            // 5. 发送请求
             const resp = await fetch(`${API_HOST}/v1/video/sora-video`, {
                 method: 'POST',
-                headers: { 
-                    'Authorization': `Bearer ${key}`, 
-                    'Content-Type': 'application/json' 
-                },
+                headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
@@ -210,17 +203,15 @@
             const taskId = data.data?.id || data.id;
             if(!taskId) throw new Error("未获得任务ID");
 
-            // 6. 成功提交处理
             updateCardStatus(uiId, { msg: "云端排队中...", progress: 3 });
-            startPolling(taskId, uiId, key, prompt, currentRefBase64); // 将参考图传入轮询以便保存历史
+            startPolling(taskId, uiId, key, prompt, currentRefBase64);
             
-            clearRef(); // 清空输入框
+            clearRef(); 
 
         } catch (err) {
             console.error(err);
             updateCardStatus(uiId, { msg: "提交失败: " + err.message, type: 'error' });
         } finally {
-            // 7. 无论如何，0.3秒后释放按钮
             setTimeout(() => {
                 btn.disabled = false;
                 btn.classList.remove('opacity-75', 'cursor-wait');
@@ -253,7 +244,6 @@
                     if(videoUrl) {
                         updateCardStatus(uiId, { msg: "生成完成", progress: 100, type: 'success' });
                         renderVideoResult(uiId, videoUrl);
-                        // *** 保存历史时，同时保存提示词和参考图 ***
                         saveToHistory(originalPrompt, videoUrl, originalRefImg);
                     } else {
                         updateCardStatus(uiId, { msg: "无视频链接", type: 'error' });
@@ -273,18 +263,14 @@
         }, 3000);
     }
 
-    // ================= UI 卡片逻辑 (含历史复用功能) =================
-    
-    // 创建卡片 (支持显示参考图小图)
+    // ================= UI 卡片逻辑 =================
     function createTaskCard(id, prompt, refImg = null, isHistory = false) {
         const refHtml = refImg ? `<div class="mt-2 text-[10px] text-gray-500 flex items-center bg-gray-50 p-1 rounded border border-gray-100"><img src="${refImg}" class="w-6 h-6 rounded object-cover mr-2 border"> <span class="truncate">使用了参考底图</span></div>` : '';
-        
-        // 复用按钮 (仅历史记录显示，或者任务完成后显示)
-        const reuseBtn = `<button onclick="reuseSettings('${id}')" class="text-xs bg-slate-100 hover:bg-orange-100 text-slate-600 hover:text-orange-600 px-2 py-1 rounded transition flex items-center gap-1 border border-gray-200" title="使用此参数重新生成"><i class="fas fa-history"></i> 复用参数</button>`;
+        const reuseBtn = `<button onclick="reuseSettings('${id}')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-600 hover:text-purple-800 px-2 py-1 rounded transition flex items-center gap-1 border border-purple-100" title="使用此参数重新生成"><i class="fas fa-history"></i> 复用参数</button>`;
 
         const html = `
             <div id="${id}" class="task-card glass-panel rounded-xl shadow-sm border border-gray-100 overflow-hidden relative" data-prompt="${prompt.replace(/"/g, '&quot;')}" data-ref="${refImg || ''}">
-                <div class="p-3 border-b border-gray-100 bg-white/50 flex justify-between items-start">
+                <div class="p-3 border-b border-gray-100 bg-white/40 flex justify-between items-start">
                     <div class="flex-1 mr-2">
                         <p class="text-xs text-gray-700 font-medium line-clamp-2">${prompt}</p>
                         ${refHtml}
@@ -294,11 +280,11 @@
                 
                 <div class="p-3 processing-area">
                     <div class="status-row flex justify-between text-[10px] font-bold text-slate-500 mb-1.5">
-                        <span class="status-msg"><i class="fas fa-circle-notch loading-spin mr-1 text-orange-500"></i>准备中...</span>
+                        <span class="status-msg"><i class="fas fa-circle-notch loading-spin mr-1 text-purple-500"></i>准备中...</span>
                         <span class="status-pct">0%</span>
                     </div>
                     <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                        <div class="progress-bar bg-gradient-to-r from-orange-400 to-pink-500 h-full w-0 progress-fill"></div>
+                        <div class="progress-bar bg-gradient-to-r from-purple-400 to-pink-500 h-full w-0 progress-fill"></div>
                     </div>
                 </div>
                 
@@ -308,23 +294,16 @@
         `;
         
         const container = document.getElementById('taskContainer');
-        if(isHistory) {
-            container.insertAdjacentHTML('beforeend', html); // 历史记录追加到后面
-        } else {
-            container.insertAdjacentHTML('afterbegin', html); // 新任务插到最前
-        }
+        if(isHistory) container.insertAdjacentHTML('beforeend', html);
+        else container.insertAdjacentHTML('afterbegin', html);
     }
 
-    // *** 核心新功能：复用参数 ***
     function reuseSettings(cardId) {
         const card = document.getElementById(cardId);
         const prompt = card.getAttribute('data-prompt');
         const refImg = card.getAttribute('data-ref');
 
-        // 1. 填入提示词
         document.getElementById('prompt').value = prompt;
-        
-        // 2. 填入参考图 (如果有)
         if(refImg && refImg !== "null" && refImg !== "") {
             currentRefBase64 = refImg;
             document.getElementById('refPreview').src = refImg;
@@ -334,14 +313,11 @@
         } else {
             clearRef();
         }
-
-        // 3. 视觉反馈
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('prompt').classList.add('ring-2', 'ring-orange-500');
-        setTimeout(() => document.getElementById('prompt').classList.remove('ring-2', 'ring-orange-500'), 500);
+        document.getElementById('prompt').classList.add('ring-2', 'ring-purple-500');
+        setTimeout(() => document.getElementById('prompt').classList.remove('ring-2', 'ring-purple-500'), 500);
     }
 
-    // 更新状态条
     function updateCardStatus(id, { msg, progress, type }) {
         const card = document.getElementById(id);
         if(!card) return;
@@ -349,14 +325,14 @@
         const pctEl = card.querySelector('.status-pct');
         const barEl = card.querySelector('.progress-bar');
 
-        if(msg) msgEl.innerHTML = (type === 'loading' || !type ? `<i class="fas fa-circle-notch loading-spin mr-1 text-orange-500"></i>` : ``) + msg;
+        if(msg) msgEl.innerHTML = (type === 'loading' || !type ? `<i class="fas fa-circle-notch loading-spin mr-1 text-purple-500"></i>` : ``) + msg;
         if(progress !== undefined) { barEl.style.width = `${progress}%`; pctEl.innerText = `${progress}%`; }
 
         if(type === 'success') {
             msgEl.className = 'status-msg text-green-600 font-bold';
             msgEl.innerHTML = `<i class="fas fa-check-circle mr-1"></i>完成`;
             barEl.className = 'progress-bar bg-green-500 h-full w-full';
-            card.querySelector('.processing-area').classList.add('hidden'); // 隐藏进度条区域
+            card.querySelector('.processing-area').classList.add('hidden');
         } else if(type === 'error') {
             msgEl.className = 'status-msg text-red-500';
             barEl.className = 'progress-bar bg-red-500 h-full w-full';
@@ -377,31 +353,20 @@
     }
 
     // ================= 辅助逻辑 =================
-    
-    // 参考图处理 (压缩防止卡顿)
     function handleRefSelect(e) {
         const file = e.target.files[0];
         if(!file) return;
         document.getElementById('refStatus').innerText = "处理中...";
-        
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = (ev) => {
-            const img = new Image();
-            img.src = ev.target.result;
+            const img = new Image(); img.src = ev.target.result;
             img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                // 限制最大边长 1024 (Sora 通常不需要超大图，太大容易传输失败)
-                const max = 1024; 
-                let w = img.width, h = img.height;
+                const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+                const max = 1024; let w = img.width, h = img.height;
                 if(w>h){if(w>max){h*=max/w;w=max;}}else{if(h>max){w*=max/h;h=max;}}
-                canvas.width=w; canvas.height=h;
-                ctx.drawImage(img,0,0,w,h);
-                
-                // 压缩质量 0.8
-                currentRefBase64 = canvas.toDataURL('image/jpeg', 0.8);
-                
+                c.width=w; c.height=h; ctx.drawImage(img,0,0,w,h);
+                currentRefBase64 = c.toDataURL('image/jpeg', 0.8);
                 document.getElementById('refPreview').src = currentRefBase64;
                 document.getElementById('uploadZone').classList.add('hidden');
                 document.getElementById('previewZone').classList.remove('hidden');
@@ -417,19 +382,18 @@
         document.getElementById('refStatus').innerText = "未选择";
     }
 
-    // 角色管理 (复用之前的逻辑)
     function loadChars() {
         const chars = JSON.parse(localStorage.getItem('sora_chars') || '[]');
         const list = document.getElementById('charList');
-        if(chars.length === 0) { list.innerHTML = `<div class="col-span-2 text-center text-xs text-gray-400 py-4">暂无角色</div>`; return; }
+        if(chars.length === 0) { list.innerHTML = `<div class="col-span-2 text-center text-xs text-gray-500 py-4">暂无角色</div>`; return; }
         list.innerHTML = chars.map((c, i) => `
-            <div class="flex items-center p-1.5 border rounded-lg hover:border-orange-400 cursor-pointer bg-white group transition" onclick="insertPrompt('@${c.id}')">
+            <div class="flex items-center p-1.5 border rounded-lg hover:border-purple-400 cursor-pointer bg-white group transition" onclick="insertPrompt('@${c.id}')">
                 <img src="${c.avatar}" class="w-8 h-8 rounded object-cover border border-gray-100">
                 <span class="ml-2 text-xs font-bold text-gray-700 truncate flex-1">@${c.id}</span>
                 <button onclick="delChar(event, ${i})" class="text-gray-300 hover:text-red-500 px-1 hidden group-hover:block"><i class="fas fa-times"></i></button>
             </div>`).join('');
     }
-    function saveCharToLocal() { /* 保持之前的压缩保存逻辑 */
+    function saveCharToLocal() {
         const id = document.getElementById('newCharId').value.trim();
         const file = document.getElementById('newCharImg').files[0];
         if(!id || !file) return;
@@ -450,40 +414,28 @@
     function delChar(e, i) { e.stopPropagation(); const c = JSON.parse(localStorage.getItem('sora_chars')); c.splice(i,1); localStorage.setItem('sora_chars',JSON.stringify(c)); loadChars(); }
     function insertPrompt(t) { document.getElementById('prompt').value += ` ${t} `; }
     function clearCache() { if(confirm("清除所有数据?")) { localStorage.clear(); location.reload(); } }
+    function toggleAddChar() { document.getElementById('addCharForm').classList.toggle('hidden'); }
 
-    // 历史记录 (新：保存 prompt 和 image)
     function saveToHistory(prompt, url, refImg) {
         const hist = JSON.parse(localStorage.getItem('sora_history_v2') || '[]');
-        // 限制 refImg 大小，如果太大就不存了，防止 LocalStorage 爆满
         const safeRef = (refImg && refImg.length < 500000) ? refImg : null; 
-        
-        hist.unshift({ 
-            uiId: 'hist-'+Date.now(), 
-            prompt: prompt, 
-            url: url, 
-            refImg: safeRef, 
-            time: new Date().toLocaleString() 
-        });
-        
-        if(hist.length > 15) hist.pop(); // 只存最近15条
+        hist.unshift({ uiId: 'hist-'+Date.now(), prompt: prompt, url: url, refImg: safeRef, time: new Date().toLocaleString() });
+        if(hist.length > 15) hist.pop();
         localStorage.setItem('sora_history_v2', JSON.stringify(hist));
     }
 
     function loadHistory() {
         const hist = JSON.parse(localStorage.getItem('sora_history_v2') || '[]');
-        // 清空容器重新渲染
-        // 注意：这里我们反向遍历，让旧的在下面
         for (let i = hist.length - 1; i >= 0; i--) {
             const h = hist[i];
             if(!document.getElementById(h.uiId)) {
-                createTaskCard(h.uiId, h.prompt, h.refImg, true); // true 表示是历史记录
+                createTaskCard(h.uiId, h.prompt, h.refImg, true);
                 updateCardStatus(h.uiId, { msg: "历史记录", progress: 100, type: 'success' });
                 renderVideoResult(h.uiId, h.url);
             }
         }
     }
 
-    // 通用解析
     async function parseResponse(response) {
         const text = await response.text();
         try { return JSON.parse(text); } catch(e) {}
