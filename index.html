@@ -3,39 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sora2 创作中心 - 最终版</title>
+    <title>Sora2 创作中心 - 极速版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === 修复后的动态背景动画 === */
+        /* === 动态背景动画 === */
         @keyframes gradient-xy {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
         .animate-gradient {
-            /* 增强颜色的饱和度，使其更明显 */
             background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fad0c4, #a18cd1, #fbc2eb);
             background-size: 400% 400%;
-            /* 稍微加快速度，让动态更易被感知 */
             animation: gradient-xy 12s ease infinite;
         }
         
-        /* 玻璃拟态卡片样式 */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.85); /*稍微增加不透明度以突出文字*/
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.6);
         }
 
-        /* 旋转和过渡动画 */
         .loading-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .progress-fill { transition: width 0.5s ease-in-out; }
         .task-card { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* 自定义滚动条 */
+        /* 按钮点击波纹效果 */
+        .btn-click-anim:active { transform: scale(0.98); }
+        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
@@ -49,10 +47,10 @@
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold flex items-center">
                 <i class="fas fa-magic mr-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400"></i>
-                Sora2 创作中心 <span class="text-xs bg-slate-700 ml-2 px-2 py-0.5 rounded text-gray-300">Ultimate</span>
+                Sora2 创作中心 <span class="text-xs bg-purple-600 ml-2 px-2 py-0.5 rounded text-white">Turbo</span>
             </h1>
             <div class="text-[10px] flex gap-2">
-                <span class="bg-slate-800 px-2 py-1 rounded border border-slate-600"><i class="fas fa-bolt text-yellow-400"></i> 极速模式</span>
+                <span class="bg-slate-800 px-2 py-1 rounded border border-slate-600"><i class="fas fa-bolt text-yellow-400"></i> 极速连发模式已开启</span>
             </div>
         </div>
     </header>
@@ -66,22 +64,21 @@
                     <button onclick="toggleAddChar()" class="text-purple-600 text-xs font-bold hover:bg-purple-50 px-2 py-1 rounded transition">+ 新增</button>
                 </div>
                 <div id="charList" class="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar"></div>
-                
                 <div id="addCharForm" class="hidden border-t mt-3 pt-3 space-y-2 border-gray-200">
-                    <input type="text" id="newCharId" placeholder="ID (如: Lily)" class="w-full p-2 border rounded text-xs outline-none focus:border-purple-500">
+                    <input type="text" id="newCharId" placeholder="ID" class="w-full p-2 border rounded text-xs outline-none focus:border-purple-500">
                     <input type="file" id="newCharImg" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:bg-purple-50 file:text-purple-700 cursor-pointer">
                     <button onclick="saveCharToLocal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-1.5 rounded text-xs font-bold transition">保存</button>
                 </div>
             </div>
-            <button onclick="clearCache()" class="w-full text-[10px] text-gray-500 hover:text-red-500 text-center py-2 glass-panel rounded-lg hover:bg-white/90 transition">重置所有数据</button>
+            <button onclick="clearCache()" class="w-full text-[10px] text-gray-500 hover:text-red-500 text-center py-2 glass-panel rounded-lg hover:bg-white/90 transition">重置数据</button>
         </section>
 
         <section class="lg:col-span-5 space-y-4">
             <div class="glass-panel p-5 rounded-xl shadow-lg border-t-4 border-purple-500">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">API Key (自动保存)</label>
-                        <input type="password" id="apiKey" placeholder="在此输入 Bearer Token" class="w-full p-2.5 bg-white/60 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all focus:bg-white">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">API Key</label>
+                        <input type="password" id="apiKey" placeholder="Bearer Token" class="w-full p-2.5 bg-white/60 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all focus:bg-white">
                     </div>
 
                     <div>
@@ -91,7 +88,7 @@
 
                     <div class="relative">
                         <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase flex justify-between">
-                            <span>参考底图 (垫图)</span>
+                            <span>参考底图</span>
                             <span class="text-purple-500 text-[10px] font-normal" id="refStatus">未选择</span>
                         </label>
                         
@@ -99,18 +96,14 @@
                             <input type="file" id="refInput" accept="image/*" class="hidden" onchange="handleRefSelect(event)">
                             <label for="refInput" class="cursor-pointer block">
                                 <i class="fas fa-images text-gray-300 group-hover:text-purple-500 text-2xl mb-2 transition-transform group-hover:scale-110"></i>
-                                <div class="text-xs text-gray-500">点击上传参考图 (将会影响视频构图/风格)</div>
+                                <div class="text-xs text-gray-500">点击上传参考图</div>
                             </label>
                         </div>
 
                         <div id="previewZone" class="hidden flex items-center bg-purple-50 border border-purple-200 rounded-lg p-2 mt-2 shadow-sm">
-                            <div class="relative group cursor-pointer">
-                                <img id="refPreview" src="" class="w-16 h-16 rounded-md object-cover border border-white shadow-sm" onclick="document.getElementById('refInput').click()">
-                                <div class="absolute inset-0 bg-black/20 hidden group-hover:flex items-center justify-center rounded-md text-white text-xs">换图</div>
-                            </div>
+                            <img id="refPreview" src="" class="w-16 h-16 rounded-md object-cover border border-white shadow-sm">
                             <div class="ml-3 flex-1 min-w-0">
-                                <p class="text-xs font-bold text-purple-900 truncate">参考图已就绪</p>
-                                <p class="text-[10px] text-purple-700/70">将在生成时强制应用</p>
+                                <p class="text-xs font-bold text-purple-900">参考图就绪</p>
                             </div>
                             <button onclick="clearRef()" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 transition"><i class="fas fa-trash-alt"></i></button>
                         </div>
@@ -128,10 +121,10 @@
                         </select>
                     </div>
 
-                    <button id="submitBtn" onclick="submitTask()" class="w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex justify-center items-center group relative overflow-hidden">
+                    <button id="submitBtn" onclick="submitTaskFast()" class="btn-click-anim w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex justify-center items-center group relative overflow-hidden">
                         <div class="absolute inset-0 bg-white/10 group-hover:translate-x-full transition-transform duration-500 transform -skew-x-12 -translate-x-full"></div>
-                        <span id="btnText">立即生成视频</span>
-                        <i id="btnIcon" class="fas fa-paper-plane ml-2"></i>
+                        <span id="btnText">立即生成 (无等待)</span>
+                        <i class="fas fa-paper-plane ml-2"></i>
                     </button>
                 </div>
             </div>
@@ -139,17 +132,14 @@
 
         <section class="lg:col-span-4 h-full flex flex-col">
             <div class="flex items-center justify-between mb-3 glass-panel p-2 rounded-lg">
-                <h2 class="text-xs font-bold text-gray-600 uppercase tracking-widest ml-2">任务列表 & 历史</h2>
-                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full border border-green-200">自动保存中</span>
+                <h2 class="text-xs font-bold text-gray-600 uppercase tracking-widest ml-2">任务队列</h2>
+                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full border border-green-200">自动保存</span>
             </div>
-            
-            <div id="taskContainer" class="space-y-4 pb-10 overflow-y-auto max-h-[85vh] pr-1 custom-scrollbar">
-                </div>
+            <div id="taskContainer" class="space-y-4 pb-10 overflow-y-auto max-h-[85vh] pr-1 custom-scrollbar"></div>
         </section>
     </main>
 
 <script>
-    // ================= 配置与初始化 =================
     const API_HOST = "https://grsaiapi.com";
     let currentRefBase64 = null;
     
@@ -160,67 +150,92 @@
         if(savedKey) document.getElementById('apiKey').value = savedKey;
     });
 
-    // ================= 核心：提交逻辑 =================
-    async function submitTask() {
+    // ================= 极速提交逻辑 (核心修改) =================
+    
+    function submitTaskFast() {
         const btn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        
-        const prompt = document.getElementById('prompt').value.trim();
+        const promptInput = document.getElementById('prompt');
+        const prompt = promptInput.value.trim();
         const key = document.getElementById('apiKey').value.trim();
-        if(!prompt || !key) return alert("请填写 API Key 和 提示词");
+        
+        // 1. 基础校验
+        if(!prompt || !key) {
+            alert("请至少填写 API Key 和 提示词");
+            return;
+        }
         localStorage.setItem('sora_api_key', key);
 
-        btn.disabled = true;
-        btn.classList.add('opacity-75', 'cursor-wait');
-        btnText.innerText = "正在发送指令...";
-        
-        const uiId = 'job-' + Date.now();
-        createTaskCard(uiId, prompt, currentRefBase64);
+        // 2. 数据快照 (Snapshoting)
+        // 必须立刻把当前的数据保存到局部变量，因为下一秒用户可能就清空界面了
+        const taskData = {
+            prompt: prompt,
+            refImg: currentRefBase64, // 复制当前的参考图数据
+            ratio: document.getElementById('aspectRatio').value,
+            duration: parseInt(document.getElementById('duration').value),
+            key: key,
+            uiId: 'job-' + Date.now() // 立刻生成 UI ID
+        };
 
+        // 3. 瞬间反馈 (Immediate Feedback)
+        // 立刻清空界面，让用户感觉“发完了”
+        promptInput.value = ''; // 清空提示词
+        clearRef(); // 清空参考图
+        
+        // 按钮做一个微小的视觉反馈，但不禁用
+        const originalText = document.getElementById('btnText').innerText;
+        document.getElementById('btnText').innerText = "已加入队列!";
+        setTimeout(() => document.getElementById('btnText').innerText = originalText, 1000);
+
+        // 4. 立刻创建 UI 卡片
+        createTaskCard(taskData.uiId, taskData.prompt, taskData.refImg);
+        updateCardStatus(taskData.uiId, { msg: "正在发送指令...", progress: 1 });
+
+        // 5. 后台执行请求 (Background Execution)
+        // 不使用 await 阻塞主线程，让这个函数自己去跑
+        performBackgroundTask(taskData);
+    }
+
+    // 独立的后台处理函数
+    async function performBackgroundTask(data) {
         try {
             const payload = {
                 model: "sora-2",
-                prompt: prompt,
-                aspectRatio: document.getElementById('aspectRatio').value,
-                duration: parseInt(document.getElementById('duration').value)
+                prompt: data.prompt,
+                aspectRatio: data.ratio,
+                duration: data.duration
             };
 
-            if(currentRefBase64) {
-                payload.reference_image = currentRefBase64;
-                payload.image = currentRefBase64;
-                payload.image_url = currentRefBase64;
+            // 多字段兼容参考图
+            if(data.refImg) {
+                payload.reference_image = data.refImg;
+                payload.image = data.refImg;
+                payload.image_url = data.refImg;
             }
 
             const resp = await fetch(`${API_HOST}/v1/video/sora-video`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+                headers: { 'Authorization': `Bearer ${data.key}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            const data = await parseResponse(resp);
-            if(!resp.ok) throw new Error(data?.msg || "服务器返回错误");
+            const resData = await parseResponse(resp);
+            if(!resp.ok) throw new Error(resData?.msg || "服务器拒绝");
             
-            const taskId = data.data?.id || data.id;
+            const taskId = resData.data?.id || resData.id;
             if(!taskId) throw new Error("未获得任务ID");
 
-            updateCardStatus(uiId, { msg: "云端排队中...", progress: 3 });
-            startPolling(taskId, uiId, key, prompt, currentRefBase64);
-            
-            clearRef(); 
+            // 请求成功，转入轮询
+            updateCardStatus(data.uiId, { msg: "云端渲染中...", progress: 5 });
+            startPolling(taskId, data.uiId, data.key, data.prompt, data.refImg);
 
         } catch (err) {
             console.error(err);
-            updateCardStatus(uiId, { msg: "提交失败: " + err.message, type: 'error' });
-        } finally {
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.classList.remove('opacity-75', 'cursor-wait');
-                btnText.innerText = "立即生成视频";
-            }, 300);
+            // 只有当前这个卡片会显示错误，不影响其他卡片
+            updateCardStatus(data.uiId, { msg: "发送失败: " + err.message, type: 'error' });
         }
     }
 
-    // ================= 轮询逻辑 =================
+    // ================= 轮询逻辑 (保持不变) =================
     function startPolling(taskId, uiId, key, originalPrompt, originalRefImg) {
         let errorCount = 0;
         const timer = setInterval(async () => {
@@ -253,7 +268,7 @@
                     updateCardStatus(uiId, { msg: "失败: " + (failure_reason || "未知"), type: 'error' });
                 } else {
                     updateCardStatus(uiId, { 
-                        msg: safeProgress > 0 ? `渲染中 ${safeProgress}%` : `等待服务器分配资源...`, 
+                        msg: safeProgress > 0 ? `渲染中 ${safeProgress}%` : `等待资源...`, 
                         progress: safeProgress 
                     });
                 }
@@ -263,10 +278,10 @@
         }, 3000);
     }
 
-    // ================= UI 卡片逻辑 =================
+    // ================= UI 逻辑 =================
     function createTaskCard(id, prompt, refImg = null, isHistory = false) {
         const refHtml = refImg ? `<div class="mt-2 text-[10px] text-gray-500 flex items-center bg-gray-50 p-1 rounded border border-gray-100"><img src="${refImg}" class="w-6 h-6 rounded object-cover mr-2 border"> <span class="truncate">使用了参考底图</span></div>` : '';
-        const reuseBtn = `<button onclick="reuseSettings('${id}')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-600 hover:text-purple-800 px-2 py-1 rounded transition flex items-center gap-1 border border-purple-100" title="使用此参数重新生成"><i class="fas fa-history"></i> 复用参数</button>`;
+        const reuseBtn = `<button onclick="reuseSettings('${id}')" class="text-xs bg-purple-50 hover:bg-purple-100 text-purple-600 px-2 py-1 rounded transition flex items-center gap-1 border border-purple-100"><i class="fas fa-history"></i> 复用</button>`;
 
         const html = `
             <div id="${id}" class="task-card glass-panel rounded-xl shadow-sm border border-gray-100 overflow-hidden relative" data-prompt="${prompt.replace(/"/g, '&quot;')}" data-ref="${refImg || ''}">
@@ -277,22 +292,18 @@
                     </div>
                     ${reuseBtn}
                 </div>
-                
                 <div class="p-3 processing-area">
                     <div class="status-row flex justify-between text-[10px] font-bold text-slate-500 mb-1.5">
-                        <span class="status-msg"><i class="fas fa-circle-notch loading-spin mr-1 text-purple-500"></i>准备中...</span>
+                        <span class="status-msg"><i class="fas fa-circle-notch loading-spin mr-1 text-purple-500"></i>排队中...</span>
                         <span class="status-pct">0%</span>
                     </div>
                     <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
                         <div class="progress-bar bg-gradient-to-r from-purple-400 to-pink-500 h-full w-0 progress-fill"></div>
                     </div>
                 </div>
-                
-                <div class="video-container hidden bg-black relative group">
-                    </div>
+                <div class="video-container hidden bg-black relative group"></div>
             </div>
         `;
-        
         const container = document.getElementById('taskContainer');
         if(isHistory) container.insertAdjacentHTML('beforeend', html);
         else container.insertAdjacentHTML('afterbegin', html);
@@ -314,8 +325,6 @@
             clearRef();
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('prompt').classList.add('ring-2', 'ring-purple-500');
-        setTimeout(() => document.getElementById('prompt').classList.remove('ring-2', 'ring-purple-500'), 500);
     }
 
     function updateCardStatus(id, { msg, progress, type }) {
@@ -343,20 +352,14 @@
         const card = document.getElementById(id);
         if(!card) return;
         const container = card.querySelector('.video-container');
-        container.innerHTML = `
-            <video src="${url}" controls class="w-full h-auto max-h-[300px] object-contain"></video>
-            <div class="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                 <a href="${url}" target="_blank" class="bg-black/60 text-white p-2 rounded hover:bg-black text-xs"><i class="fas fa-external-link-alt"></i></a>
-            </div>
-        `;
+        container.innerHTML = `<video src="${url}" controls class="w-full h-auto max-h-[300px] object-contain"></video> <div class="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition"><a href="${url}" target="_blank" class="bg-black/60 text-white p-2 rounded hover:bg-black text-xs"><i class="fas fa-external-link-alt"></i></a></div>`;
         container.classList.remove('hidden');
     }
 
-    // ================= 辅助逻辑 =================
+    // ================= 辅助 =================
     function handleRefSelect(e) {
         const file = e.target.files[0];
         if(!file) return;
-        document.getElementById('refStatus').innerText = "处理中...";
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = (ev) => {
@@ -381,68 +384,27 @@
         document.getElementById('previewZone').classList.add('hidden');
         document.getElementById('refStatus').innerText = "未选择";
     }
-
+    
+    // 角色管理 & 历史记录 (简化保留)
     function loadChars() {
         const chars = JSON.parse(localStorage.getItem('sora_chars') || '[]');
         const list = document.getElementById('charList');
         if(chars.length === 0) { list.innerHTML = `<div class="col-span-2 text-center text-xs text-gray-500 py-4">暂无角色</div>`; return; }
-        list.innerHTML = chars.map((c, i) => `
-            <div class="flex items-center p-1.5 border rounded-lg hover:border-purple-400 cursor-pointer bg-white group transition" onclick="insertPrompt('@${c.id}')">
-                <img src="${c.avatar}" class="w-8 h-8 rounded object-cover border border-gray-100">
-                <span class="ml-2 text-xs font-bold text-gray-700 truncate flex-1">@${c.id}</span>
-                <button onclick="delChar(event, ${i})" class="text-gray-300 hover:text-red-500 px-1 hidden group-hover:block"><i class="fas fa-times"></i></button>
-            </div>`).join('');
+        list.innerHTML = chars.map((c, i) => `<div class="flex items-center p-1.5 border rounded-lg hover:border-purple-400 cursor-pointer bg-white group transition" onclick="insertPrompt('@${c.id}')"><img src="${c.avatar}" class="w-8 h-8 rounded object-cover border border-gray-100"><span class="ml-2 text-xs font-bold text-gray-700 truncate flex-1">@${c.id}</span><button onclick="delChar(event, ${i})" class="text-gray-300 hover:text-red-500 px-1 hidden group-hover:block"><i class="fas fa-times"></i></button></div>`).join('');
     }
     function saveCharToLocal() {
-        const id = document.getElementById('newCharId').value.trim();
-        const file = document.getElementById('newCharImg').files[0];
+        const id = document.getElementById('newCharId').value.trim(); const file = document.getElementById('newCharImg').files[0];
         if(!id || !file) return;
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => {
-            const img = new Image(); img.src = e.target.result;
-            img.onload = () => {
-                const c = document.createElement('canvas'); const ctx = c.getContext('2d');
-                let w=img.width,h=img.height; if(w>150){h*=150/w;w=150;} c.width=w;c.height=h; ctx.drawImage(img,0,0,w,h);
-                const chars = JSON.parse(localStorage.getItem('sora_chars')||'[]');
-                chars.push({id, avatar: c.toDataURL('image/jpeg',0.6)});
-                localStorage.setItem('sora_chars', JSON.stringify(chars));
-                loadChars(); document.getElementById('newCharId').value='';
-            }
-        }
+        const reader = new FileReader(); reader.readAsDataURL(file);
+        reader.onload = (e) => { const img = new Image(); img.src = e.target.result; img.onload = () => { const c = document.createElement('canvas'); const ctx = c.getContext('2d'); let w=img.width,h=img.height; if(w>150){h*=150/w;w=150;} c.width=w;c.height=h; ctx.drawImage(img,0,0,w,h); const chars = JSON.parse(localStorage.getItem('sora_chars')||'[]'); chars.push({id, avatar: c.toDataURL('image/jpeg',0.6)}); localStorage.setItem('sora_chars', JSON.stringify(chars)); loadChars(); document.getElementById('newCharId').value=''; } }
     }
     function delChar(e, i) { e.stopPropagation(); const c = JSON.parse(localStorage.getItem('sora_chars')); c.splice(i,1); localStorage.setItem('sora_chars',JSON.stringify(c)); loadChars(); }
     function insertPrompt(t) { document.getElementById('prompt').value += ` ${t} `; }
     function clearCache() { if(confirm("清除所有数据?")) { localStorage.clear(); location.reload(); } }
     function toggleAddChar() { document.getElementById('addCharForm').classList.toggle('hidden'); }
-
-    function saveToHistory(prompt, url, refImg) {
-        const hist = JSON.parse(localStorage.getItem('sora_history_v2') || '[]');
-        const safeRef = (refImg && refImg.length < 500000) ? refImg : null; 
-        hist.unshift({ uiId: 'hist-'+Date.now(), prompt: prompt, url: url, refImg: safeRef, time: new Date().toLocaleString() });
-        if(hist.length > 15) hist.pop();
-        localStorage.setItem('sora_history_v2', JSON.stringify(hist));
-    }
-
-    function loadHistory() {
-        const hist = JSON.parse(localStorage.getItem('sora_history_v2') || '[]');
-        for (let i = hist.length - 1; i >= 0; i--) {
-            const h = hist[i];
-            if(!document.getElementById(h.uiId)) {
-                createTaskCard(h.uiId, h.prompt, h.refImg, true);
-                updateCardStatus(h.uiId, { msg: "历史记录", progress: 100, type: 'success' });
-                renderVideoResult(h.uiId, h.url);
-            }
-        }
-    }
-
-    async function parseResponse(response) {
-        const text = await response.text();
-        try { return JSON.parse(text); } catch(e) {}
-        const lines = text.split('\n');
-        for(let line of lines) if(line.startsWith('data:')) try { return JSON.parse(line.substring(5).trim()); } catch(e) {}
-        return {};
-    }
+    function saveToHistory(prompt, url, refImg) { const hist = JSON.parse(localStorage.getItem('sora_history_v2') || '[]'); const safeRef = (refImg && refImg.length < 500000) ? refImg : null; hist.unshift({ uiId: 'hist-'+Date.now(), prompt: prompt, url: url, refImg: safeRef, time: new Date().toLocaleString() }); if(hist.length > 15) hist.pop(); localStorage.setItem('sora_history_v2', JSON.stringify(hist)); }
+    function loadHistory() { const hist = JSON.parse(localStorage.getItem('sora_history_v2') || '[]'); for (let i = hist.length - 1; i >= 0; i--) { const h = hist[i]; if(!document.getElementById(h.uiId)) { createTaskCard(h.uiId, h.prompt, h.refImg, true); updateCardStatus(h.uiId, { msg: "历史记录", progress: 100, type: 'success' }); renderVideoResult(h.uiId, h.url); } } }
+    async function parseResponse(response) { const text = await response.text(); try { return JSON.parse(text); } catch(e) {} const lines = text.split('\n'); for(let line of lines) if(line.startsWith('data:')) try { return JSON.parse(line.substring(5).trim()); } catch(e) {} return {}; }
 </script>
 </body>
 </html>
