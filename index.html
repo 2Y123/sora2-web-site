@@ -116,7 +116,6 @@
                         <select id="aspectRatio" class="p-2.5 bg-white/60 border border-gray-200 rounded-lg text-sm outline-none focus:border-purple-500 cursor-pointer focus:bg-white">
                             <option value="16:9">宽屏 16:9</option>
                             <option value="9:16">竖屏 9:16</option>
-                            <option value="1:1">方形 1:1</option>
                         </select>
                         <select id="duration" class="p-2.5 bg-white/60 border border-gray-200 rounded-lg text-sm outline-none focus:border-purple-500 cursor-pointer focus:bg-white">
                             <option value="10" selected="">时长 10秒</option>
@@ -126,7 +125,7 @@
 
                     <button id="submitBtn" onclick="submitTaskFast()" class="btn-click-anim w-full bg-gradient-to-r from-slate-900 to-slate-800 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex justify-center items-center group relative overflow-hidden">
                         <div class="absolute inset-0 bg-white/10 group-hover:translate-x-full transition-transform duration-500 transform -skew-x-12 -translate-x-full"></div>
-                        <span id="btnText">立即生成 (无等待)</span>
+                        <span id="btnText">立即生成</span>
                         <i class="fas fa-paper-plane ml-2"></i>
                     </button>
                 </div>
@@ -154,15 +153,6 @@
         const savedKey = localStorage.getItem('sora_api_key');
         if(savedKey) document.getElementById('apiKey').value = savedKey;
     });
-
-    // 清除API Key函数
-    function clearApiKey() {
-        if(confirm("确定要清除已保存的API Key吗？")) {
-            document.getElementById('apiKey').value = '';
-            localStorage.removeItem('sora_api_key');
-            alert("API Key已清除");
-        }
-    }
 
     // ================= 极速提交逻辑 (核心修改) =================
     
